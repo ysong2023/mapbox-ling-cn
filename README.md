@@ -77,20 +77,6 @@ mapbox-ling-cn/
 
 1. Clone this repository
 2. Install dependencies: `pip install -r requirements.txt`
-3. Place the full GeoJSON file in the data directory
-4. Run the extraction scripts to prepare the demo data:
-   ```
-   python extract_guizhou_ijson.py        # Extract geographic data for Guizhou
-   python extract_guizhou_ling_data.py    # Extract linguistic data for Guizhou
-   ```
-5. (Coming soon) Set up the web application
-
-## Script Description
-
-- `extract_guizhou.py`: Basic script to extract Guizhou province data from GeoJSON file by loading the entire file.
-- `extract_guizhou_streaming.py`: Advanced script that processes the large GeoJSON file in chunks to reduce memory usage.
-- `extract_guizhou_ijson.py`: Script that uses the ijson library for efficient streaming of large JSON files.
-- `extract_guizhou_ling_data.py`: Script to extract Guizhou dialect data from the linguistic dataset, adding ".0" to county codes to match GeoJSON format.
 
 ## Future Vision
 
