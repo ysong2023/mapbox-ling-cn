@@ -48,19 +48,95 @@ The current demo extracts Guizhou province data using regex pattern matching in 
 - Filtering linguistic data for Guizhou province
 - Transforming county codes to ensure proper joining between datasets
 
-## Next Steps
+## Web Application Structure
 
-Our next phase of development will focus on:
+The application is built using Next.js with TypeScript and follows this structure:
 
-1. Building a web application using Next.js framework
-2. Implementing Mapbox integration for interactive map visualization
-3. Creating a user interface that allows:
-   - Filtering by dialect regions, groups, and sub-groups
-   - Color-coded visualization of different dialect areas
-   - Pop-up information panels with detailed linguistic data
-4. Expanding beyond Guizhou to include all Chinese provinces and their dialect data
-5. Optimizing performance for handling large geographic datasets
-6. Adding additional interactive features like comparison between regions
+- **Pages**
+  - `index.tsx`: Main map visualization with interactive controls
+  - `stats.tsx`: Statistical analysis of dialect distributions
+  - `check-env.tsx`: Environment checker for debugging data issues
+  
+- **API Routes**
+  - `/api/geojson.ts`: Serves the geographic data
+  - `/api/lingdata.ts`: Serves the linguistic dialect data
+  - `/api/dialectstats.ts`: Provides statistical summaries
+  - `/api/check-data-consistency.ts`: Checks data integrity between datasets
+  
+- **Components**
+  - `CountyPopup.tsx`: Displays detailed information when clicking on a county
+
+- **Key Features**
+  - Interactive map visualization with Mapbox GL
+  - Three categorization levels (Dialect Area, Group, Subgroup)
+  - Color-coded counties with dynamic legend
+  - Detailed dialect information on click
+  - Statistical analysis page
+
+## Visualizations
+
+### Dialect Groups
+![Dialect Groups Visualization](img/img1_group.png)
+
+### Dialect Subgroups
+![Dialect Subgroups Visualization](img/img2_subgroup.png)
+
+## Running the Application
+
+### Prerequisites
+- Node.js (v14 or later)
+- npm or yarn
+- Mapbox API token
+
+### Development Setup
+1. Clone the repository
+2. Navigate to the project directory
+3. Install dependencies:
+   ```
+   npm install
+   ```
+4. Create a `.env.local` file with your Mapbox token:
+   ```
+   NEXT_PUBLIC_MAPBOX_TOKEN=your_mapbox_token_here
+   ```
+5. Start the development server:
+   ```
+   npm run dev
+   ```
+6. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+### Production Build
+```
+npm run build
+npm start
+```
+
+## Docker Deployment
+
+### Prerequisites
+- Docker and Docker Compose
+- Mapbox API token
+
+### Docker Setup
+1. Create a `.env` file in the project root:
+   ```
+   NEXT_PUBLIC_MAPBOX_TOKEN=your_mapbox_token_here
+   ```
+2. Build and run the container:
+   ```
+   # On Windows
+   .\docker-build.bat
+   
+   # On Unix/Linux/macOS
+   chmod +x docker-build.sh
+   ./docker-build.sh
+   ```
+3. Access the application at [http://localhost:3000](http://localhost:3000)
+
+### Stopping the Container
+```
+docker-compose down
+```
 
 ## Repository Structure
 
