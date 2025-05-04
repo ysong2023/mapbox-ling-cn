@@ -28,11 +28,6 @@ The GeoJSON data containing administrative boundaries is from Map World (天地�
 - Operated by: National Geomatics Center of China (国家基础地理信息中心)
 - Source: [https://www.tianditu.gov.cn/](https://www.tianditu.gov.cn/)
 
-### Future Enhancement: Metadata Integration
-Our next development phase includes enhanced metadata integration similar to what's possible with tools like geojson.io. The example below shows our Guizhou province GeoJSON data loaded in geojson.io, demonstrating the rich metadata that can be embedded directly in the map features.
-
-![GeoJSON Metadata Visualization](img/img3_metadata.png)
-
 ## Current Progress
 
 ### Data Processing
@@ -52,6 +47,11 @@ The current demo extracts Guizhou province data using regex pattern matching in 
 - Extraction of geographic features from the large GeoJSON file
 - Filtering linguistic data for Guizhou province
 - Transforming county codes to ensure proper joining between datasets
+
+### Future Enhancement: Metadata Integration
+Our next development phase includes enhanced metadata integration similar to what's possible with tools like geojson.io. The example below shows our Guizhou province GeoJSON data loaded in geojson.io, demonstrating the rich metadata that can be embedded directly in the map features.
+
+![GeoJSON Metadata Visualization](img/img3_metadata.png)
 
 ## Web Application Structure
 
