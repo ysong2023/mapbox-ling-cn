@@ -28,6 +28,11 @@ The GeoJSON data containing administrative boundaries is from Map World (天地�
 - Operated by: National Geomatics Center of China (国家基础地理信息中心)
 - Source: [https://www.tianditu.gov.cn/](https://www.tianditu.gov.cn/)
 
+### Future Enhancement: Metadata Integration
+Our next development phase includes enhanced metadata integration similar to what's possible with tools like geojson.io. The example below shows our Guizhou province GeoJSON data loaded in geojson.io, demonstrating the rich metadata that can be embedded directly in the map features.
+
+![GeoJSON Metadata Visualization](img/img3_metadata.png)
+
 ## Current Progress
 
 ### Data Processing
@@ -142,11 +147,33 @@ docker-compose down
 
 ```
 mapbox-ling-cn/
-├── data/processed
-│   ├── guizhou_counties.geojson          # Extracted Guizhou geographic data
-│   └── guizhou_ling_data.json            # Extracted Guizhou linguistic data
-├── requirements.txt                      # Project dependencies
-└── README.md                             # This file
+├── data/
+│   ├── processed/
+│   │   ├── guizhou_counties.geojson          # Extracted Guizhou geographic data
+│   │   └── guizhou_ling_data.json            # Extracted Guizhou linguistic data
+├── img/                                      # Visualization screenshots
+│   ├── img1_group.png
+│   ├── img2_subgroup.png
+│   └── img3_metadata.png
+├── src/                                      # Next.js web application
+│   ├── components/                           # React components
+│   ├── pages/                                # Next.js pages
+│   │   ├── api/                              # API routes
+│   │   ├── _app.tsx                          # App wrapper
+│   │   ├── check-env.tsx                     # Environment checker
+│   │   ├── index.tsx                         # Main map page
+│   │   └── stats.tsx                         # Statistics page
+│   ├── styles/                               # CSS stylesheets
+│   └── utils/                                # Utility functions
+├── .dockerignore                             # Docker ignore file
+├── .gitignore                                # Git ignore file
+├── docker-build.bat                          # Windows Docker build script
+├── docker-build.sh                           # Unix Docker build script
+├── docker-compose.yml                        # Docker Compose configuration
+├── Dockerfile                                # Docker configuration
+├── next.config.js                            # Next.js configuration
+├── requirements.txt                          # Project dependencies
+└── README.md                                 # This file
 ```
 
 ## Getting Started
