@@ -1,9 +1,10 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import Map, { Source, Layer, MapLayerMouseEvent, FillLayer } from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import CountyPopup from '../components/CountyPopup';
+import HoverTooltip from '../components/HoverTooltip';
 
 // Types for our data
 interface LingData {
@@ -28,17 +29,27 @@ interface PopupInfo {
   countyInfo: LingData;
 }
 
+interface HoverInfo {
+  x: number;
+  y: number;
+  countyInfo: LingData;
+}
+
 // Category translation mapping
 const categoryTranslations: Record<string, Record<string, string>> = {
   '方言区': {
-    '西南官话': 'Southwest Mandarin'
+    '西南官话': 'Southwest Mandarin',
+    // Add any additional dialect areas here
   },
   '方言片': {
     '川黔片': 'Chuan-Qian Group',
     '西黔片': 'West Guizhou Group',
     '云南片': 'Yunnan Group',
     '湘广片': 'Hunan-Guangxi Group',
-    '桂柳片': 'Guiliu Group'
+    '桂柳片': 'Guiliu Group',
+    '西蜀片': 'Western Sichuan Group',
+    '湖广片': 'Huguang Group'
+    // Add any additional dialect groups here
   },
   '方言小片': {
     '黔中小片': 'Central Guizhou Subgroup',
@@ -47,9 +58,21 @@ const categoryTranslations: Record<string, Record<string, string>> = {
     '滇中小片': 'Central Yunnan Subgroup',
     '黔南小片': 'Southern Guizhou Subgroup',
     '休宝小片': 'Xiubao Subgroup',
-    '黔东小片': 'Eastern Guizhou Subgroup'
+    '黔东小片': 'Eastern Guizhou Subgroup',
+    '岷赤小片': 'Min-Chi Subgroup',
+    '怀玉小片': 'Huaiyu Subgroup',
+    '黎靖小片': 'Lijing Subgroup'
+    // Add any additional dialect subgroups here
   }
 };
+
+// English names for categories
+const categoryNames = {
+  '方言区': 'Dialect Area',
+  '方言片': 'Dialect Group',
+  '方言小片': 'Dialect Subgroup'
+};
+
 
 export default function Home() {
   // State to store our data
@@ -59,6 +82,7 @@ export default function Home() {
   const [legendOpen, setLegendOpen] = useState(true);
   const [colorBy, setColorBy] = useState<'方言区' | '方言片' | '方言小片'>('方言片');
   const [popupInfo, setPopupInfo] = useState<PopupInfo | null>(null);
+  const [hoverInfo, setHoverInfo] = useState<HoverInfo | null>(null);
   const [viewState, setViewState] = useState({
     longitude: 106.7,
     latitude: 26.6,
@@ -189,6 +213,10 @@ export default function Home() {
         const category = lingEntry[colorBy];
         feature.properties.color = colorMap[category] || '#CCCCCC';
         feature.properties.category = category;
+        // Add dialect info to feature properties for hover access
+        feature.properties.方言区 = lingEntry['方言区'];
+        feature.properties.方言片 = lingEntry['方言片'];
+        feature.properties.方言小片 = lingEntry['方言小片'];
       } else {
         // Try searching without .0 suffix
         const strippedCode = countyCode ? String(countyCode).replace('.0', '') : '';
@@ -203,6 +231,10 @@ export default function Home() {
           const category = altLingEntry[colorBy];
           feature.properties.color = colorMap[category] || '#CCCCCC';
           feature.properties.category = category;
+          // Add dialect info to feature properties for hover access
+          feature.properties.方言区 = altLingEntry['方言区'];
+          feature.properties.方言片 = altLingEntry['方言片'];
+          feature.properties.方言小片 = altLingEntry['方言小片'];
           
           // Log successful match after stripping
           console.log('Matched after format adjustment:', { 
@@ -292,6 +324,75 @@ export default function Home() {
     }
   };
 
+  // Handle mouse move over map features
+  const onMouseMove = useCallback((event: MapLayerMouseEvent) => {
+    if (!event.features || event.features.length === 0) {
+      setHoverInfo(null);
+      return;
+    }
+    
+    const feature = event.features[0];
+    const countyCode = feature.properties?.县级码;
+    
+    if (countyCode) {
+      // Try to find the county in our linguistic data
+      let countyInfo = lingData.find(item => item.县级码 === countyCode);
+      
+      // If not found with direct match, try stripping .0
+      if (!countyInfo) {
+        const strippedCode = String(countyCode).replace('.0', '');
+        countyInfo = lingData.find(item => {
+          const itemCode = String(item.县级码);
+          return itemCode === strippedCode || 
+                 itemCode === strippedCode + '.0' ||
+                 itemCode.replace('.0', '') === strippedCode;
+        });
+      }
+      
+      if (countyInfo) {
+        setHoverInfo({
+          x: event.point.x,
+          y: event.point.y,
+          countyInfo
+        });
+      } else {
+        setHoverInfo(null);
+      }
+    } else {
+      setHoverInfo(null);
+    }
+  }, [lingData]);
+  
+  // Handle mouse leave from map
+  const onMouseLeave = useCallback(() => {
+    setHoverInfo(null);
+  }, []);
+
+  // Handle dialect selection clicks
+  const handleDialectAreaClick = useCallback(() => {
+    if (!hoverInfo) return;
+    const dialectArea = hoverInfo.countyInfo['方言区'];
+    setColorBy('方言区');
+    // You could also implement a filter here to show only counties with this dialect area
+    console.log(`Filtered to dialect area: ${dialectArea}`);
+  }, [hoverInfo]);
+
+  const handleDialectGroupClick = useCallback(() => {
+    if (!hoverInfo) return;
+    const dialectGroup = hoverInfo.countyInfo['方言片'];
+    setColorBy('方言片');
+    // You could also implement a filter here to show only counties with this dialect group
+    console.log(`Filtered to dialect group: ${dialectGroup}`);
+  }, [hoverInfo]);
+
+  const handleDialectSubgroupClick = useCallback(() => {
+    if (!hoverInfo) return;
+    const dialectSubgroup = hoverInfo.countyInfo['方言小片'];
+    setColorBy('方言小片');
+    // You could also implement a filter here to show only counties with this dialect subgroup
+    console.log(`Filtered to dialect subgroup: ${dialectSubgroup}`);
+  }, [hoverInfo]);
+
   if (!mapboxToken) {
     return <div className="text-center p-10 text-red-600">Error: Mapbox token not found. Make sure you have set NEXT_PUBLIC_MAPBOX_TOKEN in your .env.local file.</div>;
   }
@@ -336,6 +437,8 @@ export default function Home() {
               mapboxAccessToken={mapboxToken}
               interactiveLayerIds={['dialect-areas']}
               onClick={onClick}
+              onMouseMove={onMouseMove}
+              onMouseLeave={onMouseLeave}
             >
               {coloredData && dataLayer && (
                 <>
@@ -356,6 +459,25 @@ export default function Home() {
               )}
             </Map>
 
+            {/* Hover tooltip */}
+            {hoverInfo && (
+              <div className="absolute pointer-events-none" style={{ left: 0, top: 0, zIndex: 9 }}>
+                <HoverTooltip
+                  x={hoverInfo.x}
+                  y={hoverInfo.y}
+                  dialectArea={hoverInfo.countyInfo['方言区']}
+                  dialectGroup={hoverInfo.countyInfo['方言片']}
+                  dialectSubgroup={hoverInfo.countyInfo['方言小片']}
+                  dialectAreaEn={categoryTranslations['方言区'][hoverInfo.countyInfo['方言区']] || hoverInfo.countyInfo['方言区']}
+                  dialectGroupEn={categoryTranslations['方言片'][hoverInfo.countyInfo['方言片']] || hoverInfo.countyInfo['方言片']}
+                  dialectSubgroupEn={categoryTranslations['方言小片'][hoverInfo.countyInfo['方言小片']] || hoverInfo.countyInfo['方言小片']}
+                  onDialectAreaClick={handleDialectAreaClick}
+                  onDialectGroupClick={handleDialectGroupClick}
+                  onDialectSubgroupClick={handleDialectSubgroupClick}
+                />
+              </div>
+            )}
+
             <div className="absolute top-4 right-4 z-10">
               <div className="bg-white p-4 rounded shadow-lg">
                 <div className="flex justify-between items-center mb-2">
@@ -365,20 +487,23 @@ export default function Home() {
                   <button
                     className={`px-3 py-1 rounded ${colorBy === '方言区' ? 'bg-indigo-600 text-white' : 'bg-gray-200'}`}
                     onClick={() => setColorBy('方言区')}
+                    title="方言区"
                   >
-                    Dialect Area
+                    {categoryNames['方言区']}
                   </button>
                   <button
                     className={`px-3 py-1 rounded ${colorBy === '方言片' ? 'bg-indigo-600 text-white' : 'bg-gray-200'}`}
                     onClick={() => setColorBy('方言片')}
+                    title="方言片"
                   >
-                    Dialect Group
+                    {categoryNames['方言片']}
                   </button>
                   <button
                     className={`px-3 py-1 rounded ${colorBy === '方言小片' ? 'bg-indigo-600 text-white' : 'bg-gray-200'}`}
                     onClick={() => setColorBy('方言小片')}
+                    title="方言小片"
                   >
-                    Dialect Subgroup
+                    {categoryNames['方言小片']}
                   </button>
                 </div>
 
@@ -400,7 +525,12 @@ export default function Home() {
                           className="w-5 h-5 mr-2" 
                           style={{ backgroundColor: colorMap[category] }}
                         ></div>
-                        <span className="text-sm">{categoryTranslations[colorBy][category] || category}</span>
+                        <span 
+                          className="text-sm" 
+                          title={category}
+                        >
+                          {categoryTranslations[colorBy][category] || category}
+                        </span>
                       </div>
                     ))}
                   </div>
